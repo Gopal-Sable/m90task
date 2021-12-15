@@ -1,27 +1,51 @@
-import express from "express";
+const express = require("express");
+// import mongoose from 'mongoose';
 const router = express.Router();
-import { v4 as uuidv4 } from 'uuid';
+const Cust = require("../schema/custSchema.js");
 
 
-let customer = []
 
 
-router.get('/user', (req, res) => {
-    res.send(customer);
+router.get('/user', async (req, res) => {
+    try {
+        const user = await Cust.find();
+        res.json(user);
+    } catch {
+        res.json({ message: err })
+    }
+
 });
 
 //create user
-router.post('/create', (req, res) => {
-    const user = req.body;
-   
-    customer.push({...user,id : uuidv4()});
-    res.send(user);
+router.post('/create', async (req, res) => {
+
+
+    // customer.push({ ...user, id: uiidv4() });
+    const user = new Cust({
+
+        cust_name: req.body.cust_name,
+        balance: req.body.balance,
+        message: req.body.message,
+        status: req.body.status
+
+    });
+    try {
+        const savedUser = await user.save();
+        res.json(savedUser);
+    } catch (err) {
+        res.json({ message: err })
+    }
 });
 
-router.delete('/delete:id',(req,res)=>{
-    const {id}=req.params;
-    // const foundCust=customer.find(user.id===id);
-    customer=customer.filter((user)=>user.id !== id);
-    res.send(customer);
+router.delete('/delete:id', async (req, res) => {
+
+    try {
+        const { id } = req.params;
+        const removed = customer.remove({ _id: id })
+        res.send(removed);
+    } catch (err) {
+        res.json({ message: err })
+    }
 })
-export default router;
+// export default router;
+module.exports = router;
